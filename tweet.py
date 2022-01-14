@@ -1,4 +1,29 @@
 import re
+import pandas as pd
+
+
+def extract_features(filename, train_per):
+    features = []
+
+    df = pd.read_csv(filename)
+    df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])
+    f = open("df.txt", "w", encoding='utf8')
+    f.write(df.to_string())
+    print(df.shape)
+
+    for d in df:
+        features.append(Features(Tweet(int(d['Id']),
+                                       str(d['Tweet']),
+                                       int(d['following']),
+                                       int(d['followers']),
+                                       int(d['actions']),
+                                       int(d['is_retweet']),
+                                       str(df['location']),
+                                       str(d['Type'])
+                                       )).assemble_vector())
+
+    print(len(features))
+    return features[:int(len(features) * train_per)], features[int(len(features) * train_per):]
 
 
 class Tweet:
@@ -8,7 +33,7 @@ class Tweet:
         self.tweet = str(tweet)
         self.following = int(following)
         self.followers = int(followers)
-        self.actions = float(actions)
+        self.actions = int(actions)
         self.is_retweet = int(is_retweet)
         self.location = str(location)
         self.Type = str(Type)
@@ -63,20 +88,25 @@ class Tweet:
         self.Type = Type
 
     def __str__(self):
-        print("\n\nTweet:", self.Id,
-              "\nbody: ", self.tweet,
-              "\nfollowing: ", self.following,
-              "\nfollowers: ", self.followers,
-              "\nactions: ", self.actions,
-              "\nis retweeted: ", self.is_retweet,
-              "\nlocation: ", self.location,
-              "\ntype: ", self.Type)
+        st = ''
+        string = "\n\nTweet:", self.Id, \
+                 "\nbody: ", self.tweet, \
+                 "\nfollowing: ", self.following, \
+                 "\nfollowers: ", self.followers, \
+                 "\nactions: ", self.actions, \
+                 "\nis retweeted: ", self.is_retweet, \
+                 "\nlocation: ", self.location, \
+                 "\ntype: ", self.Type, "\n"
+        for s in string:
+            st += str(s)
+        return st
 
 
 class Features:
 
     def __init__(self, tweet):
         self.tweet = tweet
+        self.tweet.settweet(self.clean_tweet())
         self.no_hashtag = self.calculate_no_hashtag()
         self.no_usermention = self.calculate_no_usermention()
         self.no_url = self.calculate_no_url()
@@ -88,6 +118,10 @@ class Features:
         self.no_following = self.tweet.getfollowing()
         self.reputation = self.calculate_reputation()
 
+        pass
+
+    def clean_tweet(self):
+        return re.sub('[^\w\s]', '', self.tweet.gettweet())
         pass
 
     def calculate_no_hashtag(self):
@@ -143,14 +177,9 @@ class Features:
 
     def assemble_vector(self):
 
-        f_v = [self.no_word, self.no_char, self.no_digit, self.no_char,
+        f_v = [self.no_word, self.no_char, self.no_digit,
                self.no_hashtag, self.no_usermention, self.no_url,
                self.no_following, self.no_follower, self.reputation,
                self.no_actions]
 
-        if self.tweet.getType() == 'Spam':
-            label = 1
-        else:
-            label = 0
-
-        return [f_v, label]
+        return [f_v, 1 if self.tweet.getType() == 'Spam' else 0]
