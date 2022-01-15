@@ -10,17 +10,14 @@ train_features, test_features = extract_features("train.csv", 0.7)
 X = [x[0] for x in train_features]
 Y = [x[1] for x in train_features]
 
-t = Features(Tweet(1, "hi my name is Ala, I'm new to twitter #Add_me @arajeh", 10, 2, 3, 0, "Nablus",
-                   'Quality')).assemble_vector()
-
-# clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(11, 2), random_state=1)
-# clf.fit(X, Y)
+clf = MLPClassifier(solver='lbfgs', alpha=1e-3, hidden_layer_sizes=(11, 2), random_state=1)
+clf.fit(X, Y)
 
 # gnb = GaussianNB()
 # clf = gnb.fit(X, Y)
 
-clf = RandomForestClassifier(max_depth=2, random_state=0)
-clf.fit(X, Y)
+# clf = RandomForestClassifier(max_depth=2, random_state=0)
+# clf.fit(X, Y)
 
 f = open('out.txt', 'w')
 

@@ -1,5 +1,7 @@
 import re
 import pandas as pd
+import numpy as np
+from sklearn.impute import SimpleImputer
 
 
 def extract_features(filename, train_per):
@@ -11,15 +13,15 @@ def extract_features(filename, train_per):
     f.write(df.to_string())
     print(df.shape)
 
-    for d in df:
-        features.append(Features(Tweet(int(d['Id']),
-                                       str(d['Tweet']),
-                                       int(d['following']),
-                                       int(d['followers']),
-                                       int(d['actions']),
-                                       int(d['is_retweet']),
-                                       str(df['location']),
-                                       str(d['Type'])
+    for row in df.itertuples():
+        features.append(Features(Tweet(int(row.Id),
+                                       str(row.Tweet),
+                                       int(row.following),
+                                       int(row.followers),
+                                       int(row.actions),
+                                       int(row.is_retweet),
+                                       str(row.location),
+                                       str(row.Type)
                                        )).assemble_vector())
 
     print(len(features))
