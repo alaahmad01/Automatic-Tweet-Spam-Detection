@@ -1,19 +1,19 @@
 import re
 import pandas as pd
-import numpy as np
-from sklearn.impute import SimpleImputer
+from nlp import text_learning
 
 
-def extract_features(filename, train_per):
+def extract_features(filename, test_per):
     features = []
 
     df = pd.read_csv(filename)
-    df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])
-    f = open("df.txt", "w", encoding='utf8')
-    f.write(df.to_string())
-    print(df.shape)
 
-    for row in df.itertuples():
+    df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])
+    df = df.drop_duplicates(keep='first')
+
+    nlp_results = text_learning(df.Tweet, df.Type, test_per)
+
+    for row, res in zip(df.itertuples(), nlp_results):
         features.append(Features(Tweet(int(row.Id),
                                        str(row.Tweet),
                                        int(row.following),
@@ -22,10 +22,10 @@ def extract_features(filename, train_per):
                                        int(row.is_retweet),
                                        str(row.location),
                                        str(row.Type)
-                                       )).assemble_vector())
+                                       ), res
+                                 ).assemble_vector())
 
-    print(len(features))
-    return features[:int(len(features) * train_per)], features[int(len(features) * train_per):]
+    return features
 
 
 class Tweet:
@@ -106,8 +106,9 @@ class Tweet:
 
 class Features:
 
-    def __init__(self, tweet):
+    def __init__(self, tweet, nlp_res):
         self.tweet = tweet
+        self.nlp_result = nlp_res
         self.tweet.settweet(self.clean_tweet())
         self.no_hashtag = self.calculate_no_hashtag()
         self.no_usermention = self.calculate_no_usermention()
@@ -182,6 +183,6 @@ class Features:
         f_v = [self.no_word, self.no_char, self.no_digit,
                self.no_hashtag, self.no_usermention, self.no_url,
                self.no_following, self.no_follower, self.reputation,
-               self.no_actions]
+               self.no_actions, self.nlp_result]
 
         return [f_v, 1 if self.tweet.getType() == 'Spam' else 0]

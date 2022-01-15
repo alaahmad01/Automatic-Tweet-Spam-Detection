@@ -1,49 +1,48 @@
-import string
-from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
-
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
 import re
-
-from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, average_precision_score, f1_score, recall_score
+from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("train.csv")
-df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])
-df['Tweet'] = df['Tweet'].apply(lambda x: re.sub(
-    r'(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?',
-    " ", x))
-df['Tweet'] = df['Tweet'].apply(lambda x: re.sub(r'[^\w\s]', ' ', x))
-df['Tweet'] = df['Tweet'].apply(lambda x: x.lower())
-df = df.drop_duplicates(keep='first')
 
-vectorizer = TfidfVectorizer()
-vectorizer.fit_transform(df['Tweet'])
+def text_learning(Tweet, Type, train_per):
+    Tweet = Tweet.apply(lambda x: re.sub(
+        r'(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?',
+        " ", x))
+    Tweet = Tweet.apply(lambda x: re.sub(r'[^\w\s]', ' ', x))
+    Tweet = Tweet.apply(lambda x: x.lower())
 
-pipeline = Pipeline(
-    [
-        ("vect", CountVectorizer()),
-        ("tfidf", TfidfTransformer()),
-        ("clf", SGDClassifier()),
-    ]
-)
+    X = [_ for _ in Tweet]
+    Y = [1 if x == 'Spam' else 0 for x in Type]
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=train_per, shuffle=False)
 
-parameters = {
-    "vect__max_df": (0.5, 0.75, 1.0),
-    # 'vect__max_features': (None, 5000, 10000, 50000),
-    "vect__ngram_range": ((1, 1), (1, 2)),  # unigrams or bigrams
-    # 'tfidf__use_idf': (True, False),
-    # 'tfidf__norm': ('l1', 'l2'),
-    "clf__max_iter": (200,),
-    "clf__alpha": (0.00001, 0.000001),
-    "clf__penalty": ("l2", "elasticnet"),
-    # 'clf__max_iter': (10, 50, 80),
-}
+    # NLP Neural Network
+    pipeline = Pipeline(
+        [
+            ("vect", CountVectorizer()),
+            ("tfidf", TfidfTransformer()),
+            ("scaler", StandardScaler(with_mean=False)),
+            ("clf", MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,), random_state=1,
+                                  max_iter=200)),
+        ]
+    )
 
-grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1)
+    pipeline.fit(X_train, Y_train)
+    pred_NNN = pipeline.predict(X_test)
 
-grid_search.fit([_ for _ in df.Tweet], [1 if x == 'Spam' else 0 for x in df.Type])
+    accuracy_NNN = accuracy_score(Y_test, pred_NNN)
+    cn_NNN = confusion_matrix(Y_test, pred_NNN)
+    precision_NNN = average_precision_score(Y_test, pred_NNN)
+    f1_NNN = f1_score(Y_test, pred_NNN)
+    recall_NNN = recall_score(Y_test, pred_NNN)
+    print("\nNLP Neural Network: ",
+          "\nconfusion matrix: \n", cn_NNN,
+          "\naccuracy: ", accuracy_NNN,
+          "\nprecision: ", precision_NNN,
+          "\nrecall: ", recall_NNN,
+          "\nf1: ", f1_NNN,
+          "\n----------------------------------------")
 
-grid_search.predict(['The Sanders campaign appears to say that this tension/chaos/unrest out of NV isn\'t its problempic.twitter.com/k1L8CmYbq5'])
-
+    return pred_NNN
