@@ -10,12 +10,12 @@ from sklearn.metrics import accuracy_score, confusion_matrix, average_precision_
 from tweet import extract_features
 
 test_per = 0.1
-feature = extract_features("train.csv", test_per)
+feature = extract_features("train.csv")
 
 X = [x[0] for x in feature]
 Y = [x[1] for x in feature]
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, shuffle=False)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, shuffle=False)
 
 # Naive Bayes
 pipeline_NB = Pipeline(
@@ -49,7 +49,7 @@ pipeline_RF = Pipeline(
         ("var", VarianceThreshold(threshold=(.8 * (1 - .8)))),
         ("chi2", SelectKBest(chi2, k=8)),
         ("scaler", StandardScaler()),
-        ("clf", RandomForestClassifier(max_depth=1, random_state=1)),
+        ("clf", RandomForestClassifier(random_state=1)),
     ]
 )
 
@@ -75,8 +75,8 @@ pipeline_NN = Pipeline(
         ("var", VarianceThreshold(threshold=(.8 * (1 - .8)))),
         ("chi2", SelectKBest(chi2, k=8)),
         ("scaler", StandardScaler()),
-        ("clf", MLPClassifier(solver='lbfgs', alpha=5e-5, hidden_layer_sizes=(8, 2), random_state=1,
-                              max_iter=400)),
+        ("clf", MLPClassifier(solver='lbfgs', alpha=1e-5, random_state=1,
+                              max_iter=5000)),
     ]
 )
 

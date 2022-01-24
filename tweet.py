@@ -3,7 +3,7 @@ import pandas as pd
 from nlp import text_learning
 
 
-def extract_features(filename, test_per):
+def extract_features(filename):
     features = []
 
     df = pd.read_csv(filename)
@@ -11,9 +11,16 @@ def extract_features(filename, test_per):
     df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])
     df = df.drop_duplicates(keep='first')
 
-    nlp_results = text_learning(df.Tweet, df.Type, test_per)
+    """
+    nlp_results trains only on the third of the data set and predicts the other two thirds
+    the prediction results will act as an attribute in the feature vector
+    """
+    nlp_results = text_learning(df.Tweet, df.Type)
 
-    for row, res in zip(df.itertuples(), nlp_results):
+    # set for feature extraction
+    df2 = df.iloc[int(df.shape[0] * (1/3)):]
+
+    for row, res in zip(df2.itertuples(), nlp_results):
         features.append(Features(Tweet(int(row.Id),
                                        str(row.Tweet),
                                        int(row.following),
@@ -120,6 +127,8 @@ class Features:
         self.no_follower = self.tweet.getfollowers()
         self.no_following = self.tweet.getfollowing()
         self.reputation = self.calculate_reputation()
+        self.url_word = self.calculate_url_word()
+        self.hashtag_word = self.calculate_hashtag_word()
 
         pass
 
@@ -183,6 +192,7 @@ class Features:
         f_v = [self.no_word, self.no_char, self.no_digit,
                self.no_hashtag, self.no_usermention, self.no_url,
                self.no_following, self.no_follower, self.reputation,
-               self.no_actions, self.nlp_result]
+               self.no_actions, self.url_word, self.hashtag_word,
+               self.nlp_result]
 
         return [f_v, 1 if self.tweet.getType() == 'Spam' else 0]
