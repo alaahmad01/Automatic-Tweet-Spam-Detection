@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from plot import calibration_plot
@@ -49,7 +50,7 @@ pipeline_RF = Pipeline(
         ("var", VarianceThreshold(threshold=(.8 * (1 - .8)))),
         ("chi2", SelectKBest(chi2, k=8)),
         ("scaler", StandardScaler()),
-        ("clf", RandomForestClassifier(random_state=1)),
+        ("clf", RandomForestClassifier(n_estimators=10, min_samples_split=1000, random_state=1)),
     ]
 )
 
@@ -75,7 +76,7 @@ pipeline_NN = Pipeline(
         ("var", VarianceThreshold(threshold=(.8 * (1 - .8)))),
         ("chi2", SelectKBest(chi2, k=8)),
         ("scaler", StandardScaler()),
-        ("clf", MLPClassifier(solver='lbfgs', alpha=1e-5, random_state=1,
+        ("clf", MLPClassifier(solver='lbfgs', hidden_layer_sizes=(7, 6, 5, 4, 3), alpha=15e-6, random_state=1,
                               max_iter=5000)),
     ]
 )

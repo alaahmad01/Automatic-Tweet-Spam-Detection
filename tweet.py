@@ -11,6 +11,8 @@ def extract_features(filename):
     df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])
     df = df.drop_duplicates(keep='first')
 
+    d = df.corr()
+
     """
     nlp_results trains only on the third of the data set and predicts the other two thirds
     the prediction results will act as an attribute in the feature vector
@@ -116,7 +118,7 @@ class Features:
     def __init__(self, tweet, nlp_res):
         self.tweet = tweet
         self.nlp_result = nlp_res
-        self.tweet.settweet(self.clean_tweet())
+        # self.tweet.settweet(self.clean_tweet())
         self.no_hashtag = self.calculate_no_hashtag()
         self.no_usermention = self.calculate_no_usermention()
         self.no_url = self.calculate_no_url()

@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from sklearn.calibration import CalibrationDisplay
 
-
 def calibration_plot(X_test, Y_test, pipeline_NB, pipeline_RF, pipeline_NN):
     """Plot calibration figure"""
 
@@ -90,3 +89,4 @@ def calibration_plot(X_test, Y_test, pipeline_NB, pipeline_RF, pipeline_NN):
 
     plt.tight_layout()
     plt.show()
+
