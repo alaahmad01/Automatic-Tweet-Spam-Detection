@@ -4,19 +4,18 @@ from nlp import text_learning
 
 
 def extract_features(filename):
+    """
+    function to extract the features of a tweet in a csv file using text learning and feature extraction methods
+    """
     features = []
 
     df = pd.read_csv(filename)
 
-    df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])
-    df = df.drop_duplicates(keep='first')
+    df = df.dropna(axis=0, subset=['following', 'followers', 'is_retweet', 'Tweet', 'actions', 'Type'])  # remove nulls
+    df = df.drop_duplicates(keep='first')  # remove duplicates
 
-    d = df.corr()
-
-    """
-    nlp_results trains only on the third of the data set and predicts the other two thirds
-    the prediction results will act as an attribute in the feature vector
-    """
+    # nlp_results trains only on the third of the data set and predicts the other two thirds
+    # the prediction results will act as an attribute in the feature vector
     nlp_results = text_learning(df.Tweet, df.Type)
 
     # set for feature extraction
@@ -118,7 +117,6 @@ class Features:
     def __init__(self, tweet, nlp_res):
         self.tweet = tweet
         self.nlp_result = nlp_res
-        # self.tweet.settweet(self.clean_tweet())
         self.no_hashtag = self.calculate_no_hashtag()
         self.no_usermention = self.calculate_no_usermention()
         self.no_url = self.calculate_no_url()
