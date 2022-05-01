@@ -6,22 +6,26 @@ from sklearn.preprocessing import StandardScaler
 from learn_pipe import LearnPipe
 
 
-def text_learning(Tweet, Type):
-    Tweet = Tweet.apply(lambda x: re.sub(
-        r'(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?',
-        '', x))
-    Tweet = Tweet.apply(lambda x: re.sub(r'[^\w\s]', '', x))
-    Tweet = Tweet.apply(lambda x: x.lower())
+def text_learning(tweet_in, type_in):
+    """
+    function to apply text learning methods to the text of the tweet in a neural network pipe
+    """
 
-    X = [_ for _ in Tweet]
-    Y = [1 if x == 'Spam' else 0 for x in Type]
+    tweet_in = tweet_in.apply(lambda x: re.sub(
+        r'(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?',
+        '', x))  # remove URLs from tweet
+    tweet_in = tweet_in.apply(lambda x: re.sub(r'[^\w\s]', '', x))  # remove redundant spaces
+    tweet_in = tweet_in.apply(lambda x: x.lower())
+
+    x_vec = [_ for _ in tweet_in]
+    y_vec = [1 if x == 'Spam' else 0 for x in type_in]
 
     # split the data so it trains on the first third
     # and predicts the other two thirds
-    X_train = X[:int(len(X) * (1 / 3))]
-    Y_train = Y[:int(len(X) * (1 / 3))]
-    X_test = X[int(len(X) * (1 / 3)):]
-    Y_test = Y[int(len(X) * (1 / 3)):]
+    x_train = x_vec[:int(len(x_vec) * (1 / 3))]
+    y_train = y_vec[:int(len(x_vec) * (1 / 3))]
+    x_test = x_vec[int(len(x_vec) * (1 / 3)):]
+    y_test = y_vec[int(len(x_vec) * (1 / 3)):]
 
     pipe = LearnPipe(
         "NLP Neural Network",
@@ -34,7 +38,7 @@ def text_learning(Tweet, Type):
                                       max_iter=5000)),
             ]
         ),
-        [X_train, X_test, Y_train, Y_test]
+        [x_train, x_test, y_train, y_test]
     )
 
     pipe.learn_and_test()

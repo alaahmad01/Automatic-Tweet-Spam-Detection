@@ -49,53 +49,20 @@ class Tweet:
         self.Type = str(Type)
         pass
 
-    def getid(self):
-        return self.Id
-
-    def setid(self, Id):
-        self.Id = Id
-
-    def gettweet(self):
+    def getTweet(self):
         return self.tweet
 
-    def settweet(self, tweet):
-        self.tweet = tweet
-
-    def getfollowing(self):
+    def getFollowing(self):
         return self.following
 
-    def setfollowing(self, following):
-        self.following = following
-
-    def getfollowers(self):
+    def getFollowers(self):
         return self.followers
 
-    def setfollowers(self, followers):
-        self.followers = followers
-
-    def getactions(self):
+    def getActions(self):
         return self.actions
-
-    def setactions(self, actions):
-        self.actions = actions
-
-    def getisretweet(self):
-        return self.is_retweet
-
-    def setisretweet(self, is_retweet):
-        self.is_retweet = is_retweet
-
-    def getlocation(self):
-        return self.location
-
-    def setlocation(self, location):
-        self.location = location
 
     def getType(self):
         return self.Type
-
-    def setType(self, Type):
-        self.Type = Type
 
     def __str__(self):
         st = ''
@@ -123,9 +90,9 @@ class Features:
         self.no_char = self.calculate_no_char()
         self.no_digit = self.calculate_no_digit()
         self.no_word = self.calculate_no_word()
-        self.no_actions = self.tweet.getactions()
-        self.no_follower = self.tweet.getfollowers()
-        self.no_following = self.tweet.getfollowing()
+        self.no_actions = self.tweet.getActions()
+        self.no_follower = self.tweet.getFollowers()
+        self.no_following = self.tweet.getFollowing()
         self.reputation = self.calculate_reputation()
         self.url_word = self.calculate_url_word()
         self.hashtag_word = self.calculate_hashtag_word()
@@ -133,11 +100,11 @@ class Features:
         pass
 
     def clean_tweet(self):
-        return re.sub('[^\w\s]', '', self.tweet.gettweet())
+        return re.sub('[^\w\s]', '', self.tweet.getTweet())
         pass
 
     def calculate_no_hashtag(self):
-        tweet_str = self.tweet.gettweet()
+        tweet_str = self.tweet.getTweet()
         count = 0
         for i in tweet_str:
             if i == '#':
@@ -145,7 +112,7 @@ class Features:
         return count
 
     def calculate_no_usermention(self):
-        tweet_str = self.tweet.gettweet()
+        tweet_str = self.tweet.getTweet()
         count = 0
         for s in tweet_str:
             if s == '@':
@@ -156,14 +123,14 @@ class Features:
     def calculate_no_url(self):
         urls = re.findall(
             r'(http|ftp|https):\/\/([\w\-_]+(?:(?:\.[\w\-_]+)+))([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?',
-            self.tweet.gettweet())  # regex expression to extract URLs
+            self.tweet.getTweet())  # regex expression to extract URLs
         return len(urls)
 
     def calculate_no_char(self):
-        return len(self.tweet.gettweet())
+        return len(self.tweet.getTweet())
 
     def calculate_no_digit(self):
-        tweet_str = self.tweet.gettweet()
+        tweet_str = self.tweet.getTweet()
         count = 0
         for s in tweet_str:
             if s.isnumeric():
@@ -171,7 +138,7 @@ class Features:
         return count
 
     def calculate_no_word(self):
-        tweet_str = self.tweet.gettweet()
+        tweet_str = self.tweet.getTweet()
         count = 0
         for s in tweet_str:
             if s == ' ' or s == '\n' or s == '\t':
